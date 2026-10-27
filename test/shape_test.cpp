@@ -2218,6 +2218,15 @@ TEST_CASE(find_permutation_symbolic_stride_ordering_reversal)
     EXPECT(test::throws([&] { migraphx::find_permutation(s); }));
 }
 
+TEST_CASE(find_permutation_symbolic_singleton_dim)
+{
+    // A data-dependent count (e.g. from NonMaxSuppression) can be 0, so the stride of
+    // the leading length-1 dim reaches 0 at min-eval; a length-1 dim has no layout.
+    auto n = var("n", {0, 16});
+    migraphx::shape s{migraphx::shape::int32_type, {dd{lit(1)}, dd{n}}, {n, lit(1)}};
+    EXPECT(migraphx::find_permutation(s) == std::vector<int64_t>{0, 1});
+}
+
 TEST_CASE(test_symbolic_elements_via_to_static)
 {
     auto n = var("n", {1, 8});

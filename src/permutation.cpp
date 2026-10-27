@@ -79,13 +79,18 @@ std::vector<int64_t> find_permutation(const shape& s)
         // Assumption 3 guard: when max-eval gives a strict ordering between two
         // adjacent strides, min-eval must not reverse it. Collapse to equality at
         // min is expected (e.g. when a dim has min=1), but a sign flip indicates
-        // a symbolic divisor violating assumption 1.
-        if(std::adjacent_find(result.begin(), result.end(), [&](auto a, auto b) {
+        // a symbolic divisor violating assumption 1. Dims of length 1 place no
+        // constraint on the layout, so their strides are not compared.
+        std::vector<int64_t> checked;
+        std::copy_if(result.begin(), result.end(), std::back_inserter(checked), [&](auto x) {
+            return dim_max[x] > 1;
+        });
+        if(std::adjacent_find(checked.begin(), checked.end(), [&](auto a, auto b) {
                return sym::to<int64_t>(stride_intervals[a].max) >
                           sym::to<int64_t>(stride_intervals[b].max) and
                       sym::to<int64_t>(stride_intervals[a].min) <
                           sym::to<int64_t>(stride_intervals[b].min);
-           }) != result.end())
+           }) != checked.end())
             MIGRAPHX_THROW("FIND_PERMUTATION: symbolic stride ordering reversal between "
                            "max-eval and min-eval. Violation of symbolic stride assumptions.");
     }
