@@ -54,8 +54,8 @@ struct code_object_op
 
     std::map<std::size_t, kernel_argument_value> kernel_args{};
 
-    // Tuning level of the kernel when it was compiled with keep_recipes: "quick", "exhaustive",
-    // or "none" when the kernel has nothing to tune. Empty without keep_recipes. The recipe
+    // Tuning level of the kernel when it was compiled with recompilable: "quick", "exhaustive",
+    // or "none" when the kernel has nothing to tune. Empty without recompilable. The recipe
     // itself, the precompile op, is in the instruction's recipe submodule.
     std::string tuning_level = "";
 
