@@ -30,7 +30,7 @@
 #include <migraphx/stringutils.hpp>
 #include <hip/hip_runtime_api.h>
 
-#include <algorithm>
+#include <charconv>
 #include <iostream>
 
 namespace migraphx {
@@ -50,10 +50,13 @@ std::size_t get_gfx_generation(const std::string& device_name)
     // gfx<major><minor><stepping>, where minor and stepping are one hex digit each
     if(not starts_with(gfx, "gfx") or gfx.size() < 6)
         return 0;
-    auto major = gfx.substr(3, gfx.size() - 5);
-    if(not std::all_of(major.begin(), major.end(), [](char c) { return c >= '0' and c <= '9'; }))
+    auto major         = gfx.substr(3, gfx.size() - 5);
+    std::size_t result = 0;
+    const auto* end    = major.data() + major.size();
+    auto [ptr, ec]     = std::from_chars(major.data(), end, result);
+    if(ec != std::errc{} or ptr != end)
         return 0;
-    return std::stoul(major);
+    return result;
 }
 
 int get_device_id()
